@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - 智慧商品管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.04);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg-body);
+            font-family: 'Inter', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            padding: 20px;
+        }
+
+        .welcome-container { max-width: 1400px; margin: 0 auto; }
+
+        .page-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-title i { color: var(--primary); font-size: 1.5rem; }
+
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .stat-card-info h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .stat-card-info p {
+            margin: 4px 0 0;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .stat-card-icon.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .stat-card-icon.purple { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); }
+        .stat-card-icon.pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+        .stat-card-icon.orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i { color: var(--primary); }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .quick-action-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px 8px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .quick-action-btn i { font-size: 1.5rem; }
+        .quick-action-btn span { font-size: 0.82rem; font-weight: 500; }
+
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .chart-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .chart-box .chart-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chart-box .chart-container { height: 340px; }
+
+        @media (max-width: 1200px) {
+            .stat-cards { grid-template-columns: repeat(2, 1fr); }
+            .quick-actions { grid-template-columns: repeat(3, 1fr); }
+            .charts-row { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .stat-cards { grid-template-columns: 1fr; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .counter { display: inline-block; }
+    </style>
+</head>
+<body>
+
+<div class="welcome-container">
+
+    <div class="page-title">
+        <i class="fa-solid fa-chart-line"></i>
+        数据仪表盘
+    </div>
+
+    <div class="stat-cards">
+        <div class="stat-card">
+            <div class="stat-card-icon blue">
+                <i class="fa-solid fa-box"></i>
+            </div>
+            <div class="stat-card-info">
+                <h3><span class="counter" id="counter-product">[[${summary.productCount}]]</span></h3>
+                <p>商品总数</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon purple">
+                <i class="fa-solid fa-tags"></i>
+            </div>
+            <div class="stat-card-info">
+                <h3><span class="counter" id="counter-category">[[${summary.categoryCount}]]</span></h3>
+                <p>分类总数</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon pink">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+            <div class="stat-card-info">
+                <h3><span class="counter" id="counter-order">[[${summary.orderCount}]]</span></h3>
+                <p>订单总数</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon orange">
+                <i class="fa-solid fa-coins"></i>
+            </div>
+            <div class="stat-card-info">
+                <h3>¥<span class="counter" id="counter-amount">[[${summary.totalAmount}]]</span></h3>
+                <p>总销售额</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">
+        <i class="fa-solid fa-rocket"></i> 快捷操作
+    </div>
+    <div class="quick-actions">
+        <a href="/product" target="_parent" class="quick-action-btn">
+            <i class="fa-solid fa-box" style="color:#3b82f6;"></i>
+            <span>商品管理</span>
+        </a>
+        <a href="/category" target="_parent" class="quick-action-btn">
+            <i class="fa-solid fa-tags" style="color:var(--primary);"></i>
+            <span>分类管理</span>
+        </a>
+        <a href="/order" target="_parent" class="quick-action-btn">
+            <i class="fa-solid fa-receipt" style="color:#ec4899;"></i>
+            <span>订单管理</span>
+        </a>
+        <a href="/user" target="_parent" class="quick-action-btn">
+            <i class="fa-solid fa-users" style="color:#3b82f6;"></i>
+            <span>用户管理</span>
+        </a>
+        <a href="/welcome" target="_parent" class="quick-action-btn">
+            <i class="fa-solid fa-chart-pie" style="color:#f97316;"></i>
+            <span>数据统计</span>
+        </a>
+        <a href="/settings" target="_parent" class="quick-action-btn">
+            <i class="fa-solid fa-cog" style="color:var(--text-muted);"></i>
+            <span>系统设置</span>
+        </a>
+    </div>
+
+    <div class="charts-row">
+        <div class="chart-box">
+            <div class="chart-title">
+                <i class="fa-solid fa-chart-line" style="color:var(--primary);"></i> 近7天订单趋势
+            </div>
+            <div class="chart-container" id="trendChart"></div>
+        </div>
+        <div class="chart-box">
+            <div class="chart-title">
+                <i class="fa-solid fa-chart-pie" style="color:#ec4899;"></i> 商品分类占比
+            </div>
+            <div class="chart-container" id="pieChart"></div>
+        </div>
+    </div>
+
+</div>
+
+<script th:inline="javascript">
+    var trendDays = /*[[${orderTrend.days}]]*/ [];
+    var trendCounts = /*[[${orderTrend.counts}]]*/ [];
+    var pieData = /*[[${categoryPie}]]*/ [];
+
+    function animateCounter(element) {
+        var target = parseFloat(element.textContent);
+        if (isNaN(target)) return;
+        var decimals = element.id === 'counter-amount' ? 2 : 0;
+        var duration = 1500;
+        var startTime = null;
+        var startValue = 0;
+        
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var easeOut = 1 - Math.pow(1 - progress, 3);
+            var current = startValue + (target - startValue) * easeOut;
+            element.textContent = decimals > 0 ? current.toFixed(decimals) : Math.floor(current);
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        
+        requestAnimationFrame(step);
+    }
+
+    function initCharts() {
+        var trendChartDom = document.getElementById('trendChart');
+        if (trendChartDom && trendChartDom.offsetHeight > 0) {
+            var trendChart = echarts.init(trendChartDom);
+            var trendOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'cross' },
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    borderColor: 'rgba(102, 126, 234, 0.2)',
+                    borderWidth: 1,
+                    textStyle: { color: '#f1f5f9' },
+                    formatter: function(params) {
+                        return '<div style="font-weight:600;margin-bottom:4px;color:#fff;">' + params[0].axisValue + '</div>' +
+                               '<div style="color:' + params[0].color + ';">订单数：<strong>' + params[0].value + '</strong></div>';
+                    }
+                },
+                grid: {
+                    left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: trendDays,
+                    axisLine: { lineStyle: { color: '#e2e8f0' } },
+                    axisLabel: { color: '#64748b', fontSize: 12 },
+                    axisTick: { show: false }
+                },
+                yAxis: {
+                    type: 'value',
+                    minInterval: 1,
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    axisLabel: { color: '#64748b', fontSize: 12 },
+                    splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } }
+                },
+                series: [{
+                    name: '订单数',
+                    type: 'line',
+                    smooth: true,
+                    data: trendCounts,
+                    lineStyle: { color: '#667eea', width: 3 },
+                    itemStyle: { color: '#667eea' },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(102, 126, 234, 0.25)' },
+                            { offset: 1, color: 'rgba(102, 126, 234, 0.02)' }
+                        ])
+                    },
+                    symbol: 'circle',
+                    symbolSize: 7,
+                    emphasis: {
+                        itemStyle: {
+                            color: '#667eea',
+                            borderColor: '#fff',
+                            borderWidth: 3
+                        }
+                    }
+                }]
+            };
+            trendChart.setOption(trendOption);
+            window.addEventListener('resize', function() { trendChart.resize(); });
+        }
+
+        var pieChartDom = document.getElementById('pieChart');
+        if (pieChartDom && pieChartDom.offsetHeight > 0) {
+            var pieChart = echarts.init(pieChartDom);
+            var pieOption = {
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    borderColor: 'rgba(102, 126, 234, 0.2)',
+                    borderWidth: 1,
+                    textStyle: { color: '#f1f5f9' },
+                    formatter: '{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    right: '5%',
+                    top: 'center',
+                    textStyle: { color: '#64748b', fontSize: 12 },
+                    itemWidth: 10,
+                    itemHeight: 10,
+                    itemGap: 10
+                },
+                color: ['#667eea', '#3b82f6', '#ec4899', '#f97316', '#14b8a6', '#8b5cf6'],
+                series: [{
+                    name: '商品分类',
+                    type: 'pie',
+                    radius: ['45%', '75%'],
+                    center: ['40%', '50%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 6,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: { show: false },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: 13,
+                            fontWeight: 'bold',
+                            color: '#1e293b'
+                        }
+                    },
+                    data: pieData
+                }]
+            };
+            pieChart.setOption(pieOption);
+            window.addEventListener('resize', function() { pieChart.resize(); });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var counters = document.querySelectorAll('.counter');
+        counters.forEach(function(counter) {
+            animateCounter(counter);
+        });
+        
+        setTimeout(initCharts, 300);
+        setTimeout(initCharts, 1000);
+    });
+    
+    window.addEventListener('resize', initCharts);
+</script>
+
+</body>
+</html>

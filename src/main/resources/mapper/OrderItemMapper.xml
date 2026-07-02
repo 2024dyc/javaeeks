@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartshop.mapper.OrderItemMapper">
+
+    <resultMap id="orderItemMap" type="com.smartshop.entity.OrderItem">
+        <id property="id" column="id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="price" column="price"/>
+        <result property="quantity" column="quantity"/>
+        <result property="subtotal" column="subtotal"/>
+        <result property="productName" column="product_name"/>
+        <result property="productImage" column="product_image"/>
+    </resultMap>
+
+    <!-- 根据订单 ID 查询明细（含商品名、图片） -->
+    <select id="findByOrderId" resultMap="orderItemMap">
+        SELECT oi.*, p.name AS product_name, p.image AS product_image
+        FROM order_item oi
+        LEFT JOIN product p ON oi.product_id = p.id
+        WHERE oi.order_id = #{orderId}
+    </select>
+
+</mapper>

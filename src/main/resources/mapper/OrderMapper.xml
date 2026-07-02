@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartshop.mapper.OrderMapper">
+
+    <resultMap id="orderMap" type="com.smartshop.entity.Order">
+        <id property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="username" column="username"/>
+        <result property="productNames" column="product_names"/>
+    </resultMap>
+
+    <!-- 动态条件查询订单 -->
+    <select id="findByCondition" resultMap="orderMap">
+        SELECT o.*, u.username,
+               (SELECT GROUP_CONCAT(p.name SEPARATOR ', ') 
+                FROM order_item oi 
+                LEFT JOIN product p ON oi.product_id = p.id 
+                WHERE oi.order_id = o.id) AS product_names
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        <where>
+            <if test="orderNo != null and orderNo != ''">
+                AND o.order_no LIKE CONCAT('%', #{orderNo}, '%')
+            </if>
+            <if test="userId != null">
+                AND o.user_id = #{userId}
+            </if>
+            <if test="status != null">
+                AND o.status = #{status}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND o.create_time &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND o.create_time &lt;= CONCAT(#{endDate}, ' 23:59:59')
+            </if>
+        </where>
+        ORDER BY o.id DESC
+    </select>
+
+    <!-- 根据 ID 查询订单 -->
+    <select id="findById" resultMap="orderMap">
+        SELECT o.*, u.username
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        WHERE o.id = #{id}
+    </select>
+
+    <!-- 更新订单状态 -->
+    <update id="updateStatus">
+        UPDATE orders SET status = #{status}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <!-- 统计订单总数 -->
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM orders
+    </select>
+
+    <!-- 统计总销售额 -->
+    <select id="sumTotalAmount" resultType="map">
+        SELECT COALESCE(SUM(total_amount), 0) AS total FROM orders WHERE status IN (1, 2, 3)
+    </select>
+
+    <!-- 近7天每日订单数 -->
+    <select id="countByDay" resultType="map">
+        SELECT DATE(create_time) AS day, COUNT(*) AS cnt
+        FROM orders
+        WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(create_time)
+        ORDER BY day ASC
+    </select>
+
+</mapper>

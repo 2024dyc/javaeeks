@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartshop.mapper.ProductMapper">
+
+    <!-- 结果映射：数据库列 name / category_id 映射到实体 -->
+    <resultMap id="productMap" type="com.smartshop.entity.Product">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="price" column="price"/>
+        <result property="stock" column="stock"/>
+        <result property="description" column="description"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="image" column="image"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="categoryName" column="category_name"/>
+    </resultMap>
+
+    <!-- ==================== 动态组合查询 ==================== -->
+    <select id="findByCondition" resultMap="productMap">
+        SELECT p.*, c.name AS category_name
+        FROM product p
+        LEFT JOIN category c ON p.category_id = c.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND p.name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="categoryId != null">
+                AND p.category_id = #{categoryId}
+            </if>
+            <if test="priceMin != null">
+                AND p.price &gt;= #{priceMin}
+            </if>
+            <if test="priceMax != null">
+                AND p.price &lt;= #{priceMax}
+            </if>
+        </where>
+        ORDER BY p.id DESC
+    </select>
+
+    <!-- ==================== 根据 ID 查询 ==================== -->
+    <select id="findById" resultMap="productMap">
+        SELECT p.*, c.name AS category_name
+        FROM product p
+        LEFT JOIN category c ON p.category_id = c.id
+        WHERE p.id = #{id}
+    </select>
+
+    <!-- ==================== 新增商品 ==================== -->
+    <insert id="insert" parameterType="com.smartshop.entity.Product"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO product(name, price, stock, description, category_id, image, create_time, update_time)
+        VALUES(#{name}, #{price}, #{stock}, #{description}, #{categoryId}, #{image}, NOW(), NOW())
+    </insert>
+
+    <!-- ==================== 更新商品 ==================== -->
+    <update id="update" parameterType="com.smartshop.entity.Product">
+        UPDATE product
+        SET name         = #{name},
+            price        = #{price},
+            stock        = #{stock},
+            description  = #{description},
+            category_id  = #{categoryId},
+            image        = #{image},
+            update_time  = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- ==================== 删除商品 ==================== -->
+    <delete id="deleteById">
+        DELETE FROM product WHERE id = #{id}
+    </delete>
+
+    <!-- ==================== 仪表板统计 ==================== -->
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM product
+    </select>
+
+    <select id="countByCategory" resultType="map">
+        SELECT c.name AS name, COUNT(p.id) AS value
+        FROM category c
+        LEFT JOIN product p ON c.id = p.category_id
+        GROUP BY c.id, c.name
+    </select>
+
+</mapper>
