@@ -779,10 +779,22 @@
             <ul class="pagination">
                 <li class="page-item" th:classappend="${pageInfo.isFirstPage} ? 'disabled'">
                     <a class="page-link" th:if="${!pageInfo.isFirstPage}"
-                       th:href="@{/product(keyword=${keyword}, categoryId=${categoryId}, priceMin=${priceMin}, priceMax=${priceMax}, pageNum=${pageInfo.pageNum - 1})}">
+                       th:href="@{/product(keyword=${keyword}, categoryId=${categoryId}, priceMin=${priceMin}, priceMax=${priceMax}, pageNum=1)}"
+                       title="首页">
+                        <i class="fa-solid fa-angles-left"></i>
+                    </a>
+                    <span class="page-link" th:if="${pageInfo.isFirstPage}" title="首页">
+                        <i class="fa-solid fa-angles-left"></i>
+                    </span>
+                </li>
+
+                <li class="page-item" th:classappend="${pageInfo.isFirstPage} ? 'disabled'">
+                    <a class="page-link" th:if="${!pageInfo.isFirstPage}"
+                       th:href="@{/product(keyword=${keyword}, categoryId=${categoryId}, priceMin=${priceMin}, priceMax=${priceMax}, pageNum=${pageInfo.pageNum - 1})}"
+                       title="上一页">
                         <i class="fa-solid fa-angle-left"></i>
                     </a>
-                    <span class="page-link" th:if="${pageInfo.isFirstPage}">
+                    <span class="page-link" th:if="${pageInfo.isFirstPage}" title="上一页">
                         <i class="fa-solid fa-angle-left"></i>
                     </span>
                 </li>
@@ -798,11 +810,23 @@
 
                 <li class="page-item" th:classappend="${pageInfo.isLastPage} ? 'disabled'">
                     <a class="page-link" th:if="${!pageInfo.isLastPage}"
-                       th:href="@{/product(keyword=${keyword}, categoryId=${categoryId}, priceMin=${priceMin}, priceMax=${priceMax}, pageNum=${pageInfo.pageNum + 1})}">
+                       th:href="@{/product(keyword=${keyword}, categoryId=${categoryId}, priceMin=${priceMin}, priceMax=${priceMax}, pageNum=${pageInfo.pageNum + 1})}"
+                       title="下一页">
                         <i class="fa-solid fa-angle-right"></i>
                     </a>
-                    <span class="page-link" th:if="${pageInfo.isLastPage}">
+                    <span class="page-link" th:if="${pageInfo.isLastPage}" title="下一页">
                         <i class="fa-solid fa-angle-right"></i>
+                    </span>
+                </li>
+
+                <li class="page-item" th:classappend="${pageInfo.isLastPage} ? 'disabled'">
+                    <a class="page-link" th:if="${!pageInfo.isLastPage}"
+                       th:href="@{/product(keyword=${keyword}, categoryId=${categoryId}, priceMin=${priceMin}, priceMax=${priceMax}, pageNum=${pageInfo.pages})}"
+                       title="尾页">
+                        <i class="fa-solid fa-angles-right"></i>
+                    </a>
+                    <span class="page-link" th:if="${pageInfo.isLastPage}" title="尾页">
+                        <i class="fa-solid fa-angles-right"></i>
                     </span>
                 </li>
             </ul>

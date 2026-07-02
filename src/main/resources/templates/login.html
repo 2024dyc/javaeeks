@@ -238,6 +238,14 @@
                     <i class="fa-solid fa-circle-check"></i>
                     您已成功退出登录。
                 </div>
+                <div th:if="${param.invalid}" class="alert-danger">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    登录会话已失效，请重新登录。
+                </div>
+                <div th:if="${param.expired}" class="alert-danger">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    登录已过期，请重新登录。
+                </div>
                 <form th:action="@{/login}" method="post">
                     <div class="form-group">
                         <label class="form-label">用户名</label>

@@ -33,7 +33,7 @@ spring:
     password:
     timeout: 5000ms
 
-  # Spring Cache 配置（开发环境使用内存缓存，无需 Redis）
+  # Spring Cache 配置（开发环境使用内存缓存，生产环境可切换为 Redis）
   cache:
     type: simple
 
